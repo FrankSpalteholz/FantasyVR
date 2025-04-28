@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1045 &1
+EditorBuildSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Scenes:
+  - enabled: 0
+    path: Assets/Scenes/Blackbox/VideoToVFX.unity
+    guid: 99c9720ab356a0642a771bea13969a05
+  - enabled: 1
+    path: Assets/Scenes/Fantasy_Welcome.unity
+    guid: 882d17431da2b8249a2555e7e1e857b8
+  m_configObjects:
+    com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+    com.unity.xr.arfoundation.simulation_settings: {fileID: 11400000, guid: dd6bec1bcb7175547b1dd671b9776a19, type: 2}
+    com.unity.xr.management.loader_settings: {fileID: 11400000, guid: cbe436e6d786d7e45b4bbb626397d4b3, type: 2}
+    com.unity.xr.openxr.settings4: {fileID: 11400000, guid: 55727fd960ee8634f8c9d0658d17c2c9, type: 2}
+  m_UseUCBPForAssetBundles: 0
