@@ -1,18 +1,16 @@
 using UnityEngine;
-using Meta.XR.BuildingBlocks;
-//using Meta.XR.All; // Wichtiger Namespace für Passthrough
 
 public class VRPassthroughBlender : MonoBehaviour
 {
     [Header("Settings")]
-    public Camera vrCamera; // Deine Hauptkamera
-    public Color vrBackgroundColor = Color.black; // VR Hintergrundfarbe
-    public float blendDuration = 1.0f; // Sekunden fürs Blending
+    public Camera vrCamera;
+    public Color vrBackgroundColor = Color.black;
+    public float blendDuration = 1.0f;
 
     [Header("References")]
-    public GameObject passthroughLayer; // Das Objekt, das den Passthrough Layer steuert (z.B. OVRPassthroughLayer)
+    public GameObject passthroughLayer;
 
-    private bool isInPassthrough = false;
+    private bool isInPassthrough = true; // 👉 Startzustand: Passthrough aktiv
     private bool isBlending = false;
     private float blendTimer = 0f;
 
@@ -25,18 +23,18 @@ public class VRPassthroughBlender : MonoBehaviour
 
     void Start()
     {
-        // Wir erstellen eine CanvasGroup für smoothes Alpha-Überblenden
         passthroughAlphaGroup = passthroughLayer.GetComponent<CanvasGroup>();
         if (passthroughAlphaGroup == null)
-        {
             passthroughAlphaGroup = passthroughLayer.AddComponent<CanvasGroup>();
-        }
 
-        // Startzustand: Kein Passthrough
-        passthroughLayer.SetActive(false);
-        passthroughAlphaGroup.alpha = 0f;
+        passthroughAlphaGroup.blocksRaycasts = false;
+
+        passthroughLayer.SetActive(true);
+
+        // Direkt mit Passthrough starten
+        passthroughAlphaGroup.alpha = 1f;
         vrCamera.clearFlags = CameraClearFlags.SolidColor;
-        vrCamera.backgroundColor = vrBackgroundColor;
+        vrCamera.backgroundColor = new Color(0, 0, 0, 0); // transparent
     }
 
     void Update()
@@ -52,11 +50,11 @@ public class VRPassthroughBlender : MonoBehaviour
             if (t >= 1f)
             {
                 isBlending = false;
+                // optional: passthroughLayer.SetActive(isInPassthrough);
             }
         }
     }
 
-    // Diese Methode kannst du vom Poke-Event aufrufen
     public void TogglePassthrough()
     {
         if (isBlending) return;
@@ -67,9 +65,8 @@ public class VRPassthroughBlender : MonoBehaviour
 
         if (isInPassthrough)
         {
-            passthroughLayer.SetActive(true);
             startColor = vrCamera.backgroundColor;
-            targetColor = new Color(0,0,0,0); // Transparent-Schwarz oder ganz schwarz
+            targetColor = new Color(0, 0, 0, 0);
 
             startAlpha = 0f;
             targetAlpha = 1f;
