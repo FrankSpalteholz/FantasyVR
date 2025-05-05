@@ -11,6 +11,12 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Fantasy_Welcome.unity
     guid: 882d17431da2b8249a2555e7e1e857b8
+  - enabled: 0
+    path: Assets/Scenes/Fantasy_Welcome_VRonly.unity
+    guid: 3f328f27e4f2ea14c9630673c0ec30e4
+  - enabled: 0
+    path: Assets/Scenes/Fantasy_Teleport_Test.unity
+    guid: 63d184d6f04823244ac78bbc6c351519
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
     com.unity.xr.arfoundation.simulation_settings: {fileID: 11400000, guid: dd6bec1bcb7175547b1dd671b9776a19, type: 2}
