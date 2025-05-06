@@ -7,14 +7,14 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: fantasy_model_low_1 1
-  m_Shader: {fileID: -6465566751694194690, guid: 5361bf22d3c0b4642ae6cdb4f6a1b0c9, type: 3}
+  m_Name: fantasy_model_low_wire_Mat
+  m_Shader: {fileID: -6465566751694194690, guid: 06cf107dba0bd064ea86555665cca340, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
   - WIREFRAME_DYNAMIC_MASK_NONE
   m_InvalidKeywords: []
-  m_LightmapFlags: 2
+  m_LightmapFlags: 0
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
@@ -56,18 +56,20 @@ Material:
     - Vector1_CF184A9E: 0
     - WIREFRAME_DYNAMIC_MASK: 0
     - _BaseMapUVScale: 1
+    - _Cutoff: 0
     - _Metallic: 0
     - _QueueControl: 0
     - _QueueOffset: 0
-    - _Smoothness: 0.431
+    - _Smoothness: 0
     - _WireframeShader_Smoothness: 0
     - _WireframeShader_Thickness: 0.001
-    - _Wireframe_ColorEmissionStrength: 0.21
+    - _Wireframe_ColorEmissionStrength: 0.05
     - _Wireframe_DistanceFadeEnd: 10
     - _Wireframe_DistanceFadeStart: 5
     m_Colors:
-    - _BaseColor: {r: 0.16981131, g: 0.16981131, b: 0.16981131, a: 1}
-    - _Wireframe_Color: {r: 0, g: 0, b: 0, a: 1}
+    - Color_DF059B30: {r: 0.6037736, g: 0.6037736, b: 0.6037736, a: 1}
+    - _BaseColor: {r: 0.03773582, g: 0.03773582, b: 0.03773582, a: 1}
+    - _Wireframe_Color: {r: 0.6226415, g: 0.6226415, b: 0.6226415, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
 --- !u!114 &7223272158980185138

@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: fantasy_model_low_1 1
-  m_Shader: {fileID: -6465566751694194690, guid: 5361bf22d3c0b4642ae6cdb4f6a1b0c9, type: 3}
+  m_Name: screen_model_low_unlit_Mat
+  m_Shader: {fileID: -6465566751694194690, guid: fef368d4b3971484a8e75758a1d595bf, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
@@ -59,15 +59,15 @@ Material:
     - _Metallic: 0
     - _QueueControl: 0
     - _QueueOffset: 0
-    - _Smoothness: 0.431
+    - _Smoothness: 0.079
     - _WireframeShader_Smoothness: 0
     - _WireframeShader_Thickness: 0.001
-    - _Wireframe_ColorEmissionStrength: 0.21
+    - _Wireframe_ColorEmissionStrength: 0.09
     - _Wireframe_DistanceFadeEnd: 10
     - _Wireframe_DistanceFadeStart: 5
     m_Colors:
-    - _BaseColor: {r: 0.16981131, g: 0.16981131, b: 0.16981131, a: 1}
-    - _Wireframe_Color: {r: 0, g: 0, b: 0, a: 1}
+    - _BaseColor: {r: 0.066037714, g: 0.066037714, b: 0.066037714, a: 1}
+    - _Wireframe_Color: {r: 0.23584908, g: 0.23584908, b: 0.23584908, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
 --- !u!114 &7223272158980185138
