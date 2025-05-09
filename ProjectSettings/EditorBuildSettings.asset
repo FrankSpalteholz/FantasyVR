@@ -8,14 +8,14 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/Blackbox/VideoToVFX.unity
     guid: 99c9720ab356a0642a771bea13969a05
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Fantasy_Welcome.unity
     guid: 882d17431da2b8249a2555e7e1e857b8
   - enabled: 0
     path: Assets/Scenes/Fantasy_Welcome_VRonly.unity
     guid: 3f328f27e4f2ea14c9630673c0ec30e4
-  - enabled: 0
-    path: Assets/Scenes/Fantasy_Teleport_Test.unity
+  - enabled: 1
+    path: Assets/Scenes/Fantasy_Welcome_CustomHands.unity
     guid: 63d184d6f04823244ac78bbc6c351519
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}

@@ -9,8 +9,11 @@ public class VRPassthroughBlender : MonoBehaviour
 
     [Header("References")]
     public GameObject passthroughLayer;
+    
+    [Header("Debug")]
+    public bool verboseLogging = true;
 
-    private bool isInPassthrough = true; // 👉 Startzustand: Passthrough aktiv
+    private bool isInPassthrough = true;
     private bool isBlending = false;
     private float blendTimer = 0f;
 
@@ -20,13 +23,40 @@ public class VRPassthroughBlender : MonoBehaviour
     private float targetAlpha;
 
     private CanvasGroup passthroughAlphaGroup;
+    
+    void Awake()
+    {
+        DebugLog("Awake aufgerufen");
+    }
+
+    void OnEnable()
+    {
+        DebugLog("OnEnable aufgerufen");
+        
+        // Überprüfen und erstellen der CanvasGroup
+        if (passthroughLayer != null)
+        {
+            passthroughAlphaGroup = passthroughLayer.GetComponent<CanvasGroup>();
+            
+            if (passthroughAlphaGroup == null)
+            {
+                DebugLog("Keine CanvasGroup gefunden - erstelle neue");
+                passthroughAlphaGroup = passthroughLayer.AddComponent<CanvasGroup>();
+            }
+            
+            passthroughAlphaGroup.blocksRaycasts = false;
+            DebugLog($"CanvasGroup initialisiert - Alpha: {passthroughAlphaGroup.alpha}");
+        }
+        else
+        {
+            DebugLog("Kein passthroughLayer zugewiesen!", LogLevel.Error);
+        }
+    }
 
     void Start()
     {
-        passthroughAlphaGroup = passthroughLayer.GetComponent<CanvasGroup>();
-        if (passthroughAlphaGroup == null)
-            passthroughAlphaGroup = passthroughLayer.AddComponent<CanvasGroup>();
-
+        DebugLog("Start aufgerufen");
+        
         passthroughAlphaGroup.blocksRaycasts = false;
 
         passthroughLayer.SetActive(true);
@@ -35,49 +65,106 @@ public class VRPassthroughBlender : MonoBehaviour
         passthroughAlphaGroup.alpha = 1f;
         vrCamera.clearFlags = CameraClearFlags.SolidColor;
         vrCamera.backgroundColor = new Color(0, 0, 0, 0); // transparent
+        
+        DebugLog($"Startbedingungen gesetzt: Alpha={passthroughAlphaGroup.alpha}, isInPassthrough={isInPassthrough}");
     }
 
-    void Update()
+   // Füge diese Methode hinzu, um den Blending-Status abzufragen
+public bool IsCurrentlyBlending()
+{
+    return isBlending;
+}
+
+// Ändere die TogglePassthrough-Methode
+public void TogglePassthrough()
+{
+    if (isBlending)
     {
-        if (isBlending)
+        DebugLog("TogglePassthrough ignoriert - bereits im Blending-Prozess", LogLevel.Warning);
+        return;
+    }
+
+    bool oldState = isInPassthrough;
+    isInPassthrough = !isInPassthrough;
+    
+    DebugLog($"VRPassthroughBlender: Zustand wechselt von {oldState} zu {isInPassthrough}");
+    
+    blendTimer = 0f;
+    isBlending = true;
+
+    // Rest der Methode bleibt unverändert...
+}
+
+// Ändere die Update-Methode, um sicherzustellen, dass isBlending korrekt zurückgesetzt wird
+void Update()
+{
+    if (isBlending)
+    {
+        blendTimer += Time.deltaTime;
+        float t = Mathf.Clamp01(blendTimer / blendDuration);
+
+        vrCamera.backgroundColor = Color.Lerp(startColor, targetColor, t);
+        passthroughAlphaGroup.alpha = Mathf.Lerp(startAlpha, targetAlpha, t);
+        
+        if (verboseLogging && ((t * 10) % 2) < 0.1f)
         {
-            blendTimer += Time.deltaTime;
-            float t = Mathf.Clamp01(blendTimer / blendDuration);
+            DebugLog($"Blending-Fortschritt: {t:F2}, Alpha={passthroughAlphaGroup.alpha:F2}");
+        }
 
-            vrCamera.backgroundColor = Color.Lerp(startColor, targetColor, t);
-            passthroughAlphaGroup.alpha = Mathf.Lerp(startAlpha, targetAlpha, t);
-
-            if (t >= 1f)
+        if (t >= 1f)
+        {
+            isBlending = false;
+            DebugLog($"Blending abgeschlossen: isInPassthrough={isInPassthrough}, Alpha={passthroughAlphaGroup.alpha:F2}");
+        }
+    }
+}
+    // Öffentliche Methode zur Abfrage des aktuellen Zustands
+    public bool IsInPassthrough()
+    {
+        return isInPassthrough;
+    }
+    
+    // Vereinfachtes Logging mit verschiedenen Levels
+    enum LogLevel { Info, Debug, Warning, Error }
+    
+    private void DebugLog(string message, LogLevel level = LogLevel.Debug)
+    {
+        if (!verboseLogging && level == LogLevel.Debug) return;
+        
+        string prefix = "[VRPassthrough] ";
+        
+        // In die Unity-Konsole loggen
+        switch (level)
+        {
+            case LogLevel.Warning:
+                UnityEngine.Debug.LogWarning(prefix + message);
+                break;
+            case LogLevel.Error:
+                UnityEngine.Debug.LogError(prefix + message);
+                break;
+            default:
+                UnityEngine.Debug.Log(prefix + message);
+                break;
+        }
+        
+        // In das Debug-UI loggen, wenn verfügbar
+        if (PerformanceDebugger.Instance != null)
+        {
+            switch (level)
             {
-                isBlending = false;
-                // optional: passthroughLayer.SetActive(isInPassthrough);
+                case LogLevel.Info:
+                    PerformanceDebugger.Info(prefix + message);
+                    break;
+                case LogLevel.Debug:
+                    PerformanceDebugger.Debug(prefix + message);
+                    break;
+                case LogLevel.Warning:
+                    PerformanceDebugger.Warning(prefix + message);
+                    break;
+                case LogLevel.Error:
+                    PerformanceDebugger.Error(prefix + message);
+                    break;
             }
-        }
-    }
-
-    public void TogglePassthrough()
-    {
-        if (isBlending) return;
-
-        isInPassthrough = !isInPassthrough;
-        blendTimer = 0f;
-        isBlending = true;
-
-        if (isInPassthrough)
-        {
-            startColor = vrCamera.backgroundColor;
-            targetColor = new Color(0, 0, 0, 0);
-
-            startAlpha = 0f;
-            targetAlpha = 1f;
-        }
-        else
-        {
-            startColor = vrCamera.backgroundColor;
-            targetColor = vrBackgroundColor;
-
-            startAlpha = 1f;
-            targetAlpha = 0f;
         }
     }
 }

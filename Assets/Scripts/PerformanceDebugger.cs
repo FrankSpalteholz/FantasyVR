@@ -1,6 +1,7 @@
 using UnityEngine;
 using TMPro;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine.Profiling;
 
 public class PerformanceDebugger : MonoBehaviour
@@ -13,25 +14,32 @@ public class PerformanceDebugger : MonoBehaviour
     [SerializeField] private TextMeshProUGUI trianglesText;
     [SerializeField] private TextMeshProUGUI verticesText;
     
+    [Header("Debug Log UI")]
+    [SerializeField] private TextMeshProUGUI logText;
+    [SerializeField] private int maxLogLines = 20;
+    [SerializeField] private bool showTimestamps = true;
+    [SerializeField] private KeyCode toggleLogKey = KeyCode.F2;
+    [SerializeField] private bool logVisibleAtStart = true;
+    
     [Header("Settings")]
-    [SerializeField] private float fpsUpdateInterval = 0.1f; // Higher update rate for FPS
-    [SerializeField] private float statsUpdateInterval = 0.5f; // Other stats update slower
-    [SerializeField] private int fpsBufferSize = 10; // Buffer size for smoothing
+    [SerializeField] private float fpsUpdateInterval = 0.1f;
+    [SerializeField] private float statsUpdateInterval = 0.5f;
+    [SerializeField] private int fpsBufferSize = 10;
     
     [Header("Performance Thresholds")]
     // FPS thresholds
-    [SerializeField] private float goodFpsThreshold = 72f; // Anything above this is good
-    [SerializeField] private float warningFpsThreshold = 60f; // Above this is OK, below is warning
-    [SerializeField] private float criticalFpsThreshold = 45f; // Below this is critical
+    [SerializeField] private float goodFpsThreshold = 72f;
+    [SerializeField] private float warningFpsThreshold = 60f;
+    [SerializeField] private float criticalFpsThreshold = 45f;
     
     // RAM thresholds adjusted for Quest applications
-    [SerializeField] private float maxRamDisplay = 600f; // Max RAM to display in MB
-    [SerializeField] private float warningRamThreshold = 500f; // MB
-    [SerializeField] private float criticalRamThreshold = 550f; // MB
+    [SerializeField] private float maxRamDisplay = 600f;
+    [SerializeField] private float warningRamThreshold = 500f;
+    [SerializeField] private float criticalRamThreshold = 550f;
     
     // VRAM thresholds
-    [SerializeField] private float warningVramThreshold = 800f; // MB
-    [SerializeField] private float criticalVramThreshold = 1200f; // MB
+    [SerializeField] private float warningVramThreshold = 800f;
+    [SerializeField] private float criticalVramThreshold = 1200f;
     
     // Draw calls thresholds
     [SerializeField] private int warningDrawCallsThreshold = 50;
@@ -50,11 +58,57 @@ public class PerformanceDebugger : MonoBehaviour
     private readonly string warningColor = "yellow";
     private readonly string badColor = "#FF6347"; // Reddish orange
     
+    // Zusätzliche Farben für den Debug-Log
+    private readonly string infoColor = "white";
+    private readonly string debugColor = "#00BFFF";
+    private readonly string errorColor = "#FF6347";
+    
     // Private variables for FPS calculation
     private float[] fpsBuffer;
     private int fpsBufferIndex = 0;
     private float fpsTimeLeft;
     private float currentFps;
+    
+    // Neue Debug-Log-Variablen
+    private Queue<string> logQueue = new Queue<string>();
+    private bool isLogVisible = true;
+    private GameObject logContainer; // Optional: Container für den Log-Bereich
+    
+    // Singleton-Instanz für einfachen Zugriff
+    private static PerformanceDebugger instance;
+    public static PerformanceDebugger Instance 
+    {
+        get { return instance; }
+    }
+    
+    void Awake()
+    {
+        // Singleton-Pattern
+        if (instance != null && instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        
+        instance = this;
+        
+        // Finde den Container (optional)
+        if (logText != null && logContainer == null)
+        {
+            logContainer = logText.transform.parent.gameObject;
+        }
+        
+        // Initialen Zustand setzen
+        isLogVisible = logVisibleAtStart;
+        if (logContainer != null)
+        {
+            logContainer.SetActive(isLogVisible);
+        }
+        else if (logText != null)
+        {
+            logText.gameObject.SetActive(isLogVisible);
+        }
+    }
     
     void Start()
     {
@@ -66,6 +120,9 @@ public class PerformanceDebugger : MonoBehaviour
         
         // Start stats update coroutine
         StartCoroutine(UpdateStats());
+        
+        // Optional: Starte mit einer Begrüßungsnachricht
+        LogInfo("Debug-System initialisiert");
     }
     
     void Update()
@@ -97,6 +154,12 @@ public class PerformanceDebugger : MonoBehaviour
             UpdateFpsDisplay(currentFps);
             
             fpsTimeLeft = fpsUpdateInterval;
+        }
+        
+        // Toggle-Funktion für Log-Anzeige
+        if (Input.GetKeyDown(toggleLogKey))
+        {
+            ToggleLogVisibility();
         }
     }
     
@@ -265,5 +328,103 @@ public class PerformanceDebugger : MonoBehaviour
             
             verticesText.text = $"Vertices: <color={vertColor}>{vertexCount:N0}</color>";
         }
+    }
+    
+    // NEUE METHODEN FÜR DAS DEBUG-LOGGING-SYSTEM
+    
+    public void ToggleLogVisibility()
+    {
+        isLogVisible = !isLogVisible;
+        
+        if (logContainer != null)
+        {
+            logContainer.SetActive(isLogVisible);
+        }
+        else if (logText != null)
+        {
+            logText.gameObject.SetActive(isLogVisible);
+        }
+    }
+    
+    public void ClearLogs()
+    {
+        logQueue.Clear();
+        UpdateLogDisplay();
+    }
+    
+    private void UpdateLogDisplay()
+    {
+        if (logText == null) return;
+        
+        logText.text = string.Join("\n", logQueue.ToArray());
+    }
+    
+    // Interner Log-Handler
+    private void AddLogEntry(string message, string colorCode)
+    {
+        if (logQueue == null) logQueue = new Queue<string>();
+        
+        // Zeitstempel hinzufügen, wenn gewünscht
+        string timestamp = showTimestamps ? $"[{System.DateTime.Now.ToString("HH:mm:ss")}] " : "";
+        
+        // Formatierte Log-Nachricht zur Queue hinzufügen
+        string formattedLog = $"{timestamp}<color={colorCode}>{message}</color>";
+        logQueue.Enqueue(formattedLog);
+        
+        // Queue-Größe begrenzen
+        while (logQueue.Count > maxLogLines)
+        {
+            logQueue.Dequeue();
+        }
+        
+        UpdateLogDisplay();
+    }
+    
+    // Öffentliche Logging-Methoden
+    
+    public void LogInfo(string message)
+    {
+        AddLogEntry(message, infoColor);
+    }
+    
+    public void LogDebug(string message)
+    {
+        AddLogEntry(message, debugColor);
+    }
+    
+    public void LogWarning(string message)
+    {
+        AddLogEntry(message, warningColor);
+    }
+    
+    public void LogError(string message)
+    {
+        AddLogEntry(message, errorColor);
+    }
+    
+    // Statische Methoden für einfachen Zugriff
+    
+    public static void Info(string message)
+    {
+        if (instance != null)
+            instance.LogInfo(message);
+    }
+    
+    public static void Debug(string message)
+    {
+        if (instance != null)
+            instance.LogDebug(message);
+    }
+    
+    public static void Warning(string message)
+    {
+        if (instance != null)
+            instance.LogWarning(message);
+    }
+    
+    public static void Error(string message)
+    {
+        if (instance != null)
+            instance.LogError(message);
     }
 }
